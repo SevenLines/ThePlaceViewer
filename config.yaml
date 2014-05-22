@@ -1,5 +1,5 @@
 MainWindow:
-  Filter: !!python/unicode 'Gold'
+  Filter: !!python/unicode 'Amy'
   Geometry: !!python/object/apply:PySide.QtCore.QByteArray
   - !!binary |
-    AdnQywABAAAAAAB2AAAAGwAAA6oAAAI+AAAAgAAAADsAAAOgAAACNAAAAAAAAA==
+    AdnQywABAAD////3////+AAABV4AAAMIAAAAAAAAAAD////+/////gAAAAACAA==

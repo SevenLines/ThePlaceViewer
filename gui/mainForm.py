@@ -5,12 +5,13 @@ import yaml
 from itertools import product
 
 from PySide.QtCore import QRect
-from PySide.QtCore import QModelIndex
+from PySide.QtCore import QModelIndex, Signal
 from PySide.QtGui import QPixmap, QApplication
 from PySide.QtCore import Qt
-from PySide.QtGui import QMainWindow, QSortFilterProxyModel, QLabel
+from PySide.QtGui import QMainWindow, QSortFilterProxyModel
 
 from core.siteparser import *
+from gui.LabelImage import LabelImage
 from gui.LabelProcessAnimation import LabelProcessAnimation
 from gui.processInfoWidget import ProcessInfoWidget
 from gui.ui.mainForm_ui import Ui_MainWindow
@@ -19,11 +20,14 @@ from models.celebritymodel import CelebrityModel
 
 logging.basicConfig()
 
+
 class ThreadCancel(Thread):
     _cancel = False
     queue = Queue()
+
     def cancel(self):
         self._cancel = True
+
     def is_canceled(self):
         return self._cancel
 
@@ -34,15 +38,18 @@ class MainForm(QMainWindow, Ui_MainWindow):
     SETTINGS_FILE = "config.yaml"
     log = logging.getLogger(__name__)
     processInfoWidget = None
-    lastThread = None
+    last_thread = None
     images_count = 0
 
     gui_thread = None
     queue = Queue()
     columns_count = 3
     rows_count = 3
+    save_dir = "output"
 
     end = False
+
+    pages_count_changed = Signal(int)
 
     def __init__(self, parent=None):
         Ui_MainWindow.__init__(self)
@@ -56,14 +63,21 @@ class MainForm(QMainWindow, Ui_MainWindow):
 
         self.model.modelReset.connect(self.end_load)
         self.lstCelebs.clicked.connect(self.item_selected)
+        self.spnPage.valueChanged.connect(self.load_images_for_selected)
+        self.pages_count_changed.connect(self.set_spnPage_maximum)
+        self.lstImages.doubleClicked.connect(self.save_selected_image)
 
         self.load_ini()
         self.model.reset_data()
 
     def closeEvent(self, *args, **kwargs):
-        if self.lastThread:
-            self.lastThread.cancel()
+        if self.last_thread:
+            self.last_thread.cancel()
         self.save_ini()
+
+    def set_spnPage_maximum(self, count):
+        self.spnPage.setMaximum(count)
+        self.spnPage.setSuffix("/ %s" % count)
 
     def set_images_count(self, count):
         self.images_count = count
@@ -76,8 +90,8 @@ class MainForm(QMainWindow, Ui_MainWindow):
 
     def add_image(self, i, icon, count):
         with threading.Lock():
-            label = QLabel()
-            label.setPixmap(QPixmap(icon.icon_cache_path))
+            label = LabelImage()
+            label.image = icon
             label.setAlignment(Qt.AlignCenter)
 
             row = i / self.columns_count
@@ -91,7 +105,9 @@ class MainForm(QMainWindow, Ui_MainWindow):
                 self.lstImages.clear()
                 self.lstImages.setRowCount(count / self.columns_count)
                 self.lstImages.setColumnCount(self.columns_count)
-                self.lstImages.update()
+                self.lstImages.selectRow(0)
+                self.lstImages.clearSelection()
+                self.lstImages.repaint()
 
             colsCount = self.lstImages.columnCount()
             rowsCount = self.lstImages.rowCount()
@@ -106,12 +122,12 @@ class MainForm(QMainWindow, Ui_MainWindow):
 
             if as_empty:
                 for x, y in product(xrange(colsCount), xrange(rowsCount)):
-                    self.lstImages.setCellWidget(y,x, LabelProcessAnimation())
+                    self.lstImages.setCellWidget(y, x, LabelProcessAnimation())
             QApplication.processEvents()
 
     def read_page(self, celeb):
-        page = celeb.get_page_url(1)
-        icons = get_icons(page)
+        assert isinstance(celeb, Celeb)
+        icons = get_icons(celeb, self.spnPage.value())
 
         thread = threading.current_thread()
         print id(thread)
@@ -127,16 +143,44 @@ class MainForm(QMainWindow, Ui_MainWindow):
             thread.queue.join()
 
     def item_selected(self):
-        if self.lastThread:
-            self.lastThread.cancel()
-            self.lastThread = None
+        celeb = self.get_selected_celeb()
 
+        self.obtain_pages_count(celeb)
+
+        self.spnPage.setValue(1)
+        self.load_images(celeb)
+
+    def get_selected_celeb(self):
         index = self.lstCelebs.selectedIndexes()[0]
         assert isinstance(index, QModelIndex)
-        celeb = index.data(Qt.EditRole)
+        return index.data(Qt.EditRole)
+
+    def get_selected_image(self):
+        label = self.lstImages.cellWidget(self.lstImages.currentRow(),
+                                          self.lstImages.currentColumn())
+        assert isinstance(label, LabelImage)
+        return label.image
+
+    def load_images_for_selected(self):
+        celeb = self.get_selected_celeb()
+        self.load_images(celeb)
+
+    def get_pages_info(self, celeb):
+        count = get_pages_count(celeb)
+        self.pages_count_changed.emit(count)
+
+    def obtain_pages_count(self, celeb):
+        thread = ThreadCancel(target=self.get_pages_info, args=(celeb, ))
+        thread.start()
+
+    def load_images(self, celeb):
+        # load images list
+        if self.last_thread:
+            self.last_thread.cancel()
+            self.last_thread = None
 
         thread = ThreadCancel(target=self.read_page, args=(celeb,))
-        self.lastThread = thread
+        self.last_thread = thread
         thread.start()
 
         ffirst = True
@@ -145,7 +189,6 @@ class MainForm(QMainWindow, Ui_MainWindow):
                 i, icon, count = thread.queue.get()
                 if ffirst:
                     ffirst = False
-                    self.lstImages.clear()
                     self.resize_images_list(as_empty=True, count=count)
                 self.add_image(i, icon, count)
                 thread.queue.task_done()
@@ -154,6 +197,21 @@ class MainForm(QMainWindow, Ui_MainWindow):
             QApplication.processEvents()
 
         self.resize_images_list()
+
+    def save_image(self, image):
+        b = image.full_image_bytes
+        path = os.path.join(self.save_dir, image.celeb.full_name, image.name)
+        if not os.path.exists(os.path.dirname(path)):
+            os.makedirs(os.path.dirname(path))
+
+        f = open(path, 'w')
+        f.write(b)
+        f.close()
+
+    def save_selected_image(self):
+        image = self.get_selected_image()
+        thread = ThreadCancel(target=self.save_image, args=(image, ))
+        thread.start()
 
     def begin_process(self):
         self.processInfoWidget.setParent(self.lstCelebs)

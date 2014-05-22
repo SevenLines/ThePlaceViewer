@@ -6,9 +6,11 @@ from config import *
 
 class Image(object):
     url_to_icon = ''
+    celeb = None
 
-    def __init__(self, url_to_icon):
+    def __init__(self, url_to_icon, celeb):
         self.url_to_icon = url_to_icon
+        self.celeb = celeb
 
     @property
     def name(self):
@@ -18,6 +20,10 @@ class Image(object):
         '''
         updates icon cache
         '''
+        d = os.path.dirname(self.icon_cache_path)
+        if not os.path.exists(d):
+            os.makedirs(d)
+
         with open(self.icon_cache_path, 'w') as f:
             b = utls.getPageBytes(self.url_to_icon)
             f.write(b)
@@ -49,7 +55,7 @@ class Image(object):
 
     @property
     def icon_cache_path(self):
-        return os.path.join(icons_cache_dir, self.name)
+        return os.path.join(icons_cache_dir, str(self.celeb.id), self.name)
 
     def __repr__(self):
         # return urlparse.

@@ -55,14 +55,15 @@ def get_pages_count(celeb):
     return max_page
 
 
-def get_icons(celebs_page):
+def get_icons(celeb, page):
+    celebs_page = celeb.get_page_url(page)
     assert isinstance(celebs_page, unicode)
     page = utls.getPage(celebs_page)
     soup = bs4.BeautifulSoup(page)
     tags = soup.select('.pic_box img.pic')
     for t in tags:
         t = get_photos_url(t.get('src'))
-        icon = Image(t)
+        icon = Image(t, celeb)
         yield icon, len(tags)
 
 

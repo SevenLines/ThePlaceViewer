@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'gui/ui/mainForm.ui'
 #
-# Created: Fri May 23 02:43:48 2014
+# Created: Fri May 23 03:53:40 2014
 #      by: pyside-uic 0.2.14 running on PySide 1.1.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -17,6 +17,14 @@ class Ui_MainWindow(object):
         self.centralwidget.setObjectName("centralwidget")
         self.gridLayout = QtGui.QGridLayout(self.centralwidget)
         self.gridLayout.setObjectName("gridLayout")
+        self.spnPage = QtGui.QSpinBox(self.centralwidget)
+        self.spnPage.setSuffix("")
+        self.spnPage.setMinimum(1)
+        self.spnPage.setObjectName("spnPage")
+        self.gridLayout.addWidget(self.spnPage, 0, 2, 1, 1)
+        self.toolButton = QtGui.QToolButton(self.centralwidget)
+        self.toolButton.setObjectName("toolButton")
+        self.gridLayout.addWidget(self.toolButton, 0, 1, 1, 1)
         self.verticalLayout = QtGui.QVBoxLayout()
         self.verticalLayout.setObjectName("verticalLayout")
         self.edtFilter = QtGui.QLineEdit(self.centralwidget)
@@ -39,7 +47,7 @@ class Ui_MainWindow(object):
         self.lstCelebs.horizontalHeader().setVisible(False)
         self.lstCelebs.verticalHeader().setVisible(False)
         self.verticalLayout.addWidget(self.lstCelebs)
-        self.gridLayout.addLayout(self.verticalLayout, 0, 0, 1, 1)
+        self.gridLayout.addLayout(self.verticalLayout, 0, 0, 2, 1)
         self.lstImages = QtGui.QTableWidget(self.centralwidget)
         self.lstImages.setStyleSheet("QLabel {\n"
 "    padding:10px;\n"
@@ -55,7 +63,12 @@ class Ui_MainWindow(object):
         self.lstImages.setRowCount(0)
         self.lstImages.horizontalHeader().setVisible(False)
         self.lstImages.verticalHeader().setVisible(False)
-        self.gridLayout.addWidget(self.lstImages, 0, 1, 1, 1)
+        self.gridLayout.addWidget(self.lstImages, 1, 1, 1, 4)
+        self.toolButton_2 = QtGui.QToolButton(self.centralwidget)
+        self.toolButton_2.setObjectName("toolButton_2")
+        self.gridLayout.addWidget(self.toolButton_2, 0, 3, 1, 1)
+        spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
+        self.gridLayout.addItem(spacerItem, 0, 4, 1, 1)
         self.lblCeleb = QtGui.QLabel(self.centralwidget)
         self.lblCeleb.setGeometry(QtCore.QRect(249, 9, 16, 16))
         self.lblCeleb.setText("")
@@ -81,10 +94,14 @@ class Ui_MainWindow(object):
 
         self.retranslateUi(MainWindow)
         QtCore.QObject.connect(self.actionExit, QtCore.SIGNAL("triggered()"), MainWindow.close)
+        QtCore.QObject.connect(self.toolButton_2, QtCore.SIGNAL("clicked()"), self.spnPage.stepUp)
+        QtCore.QObject.connect(self.toolButton, QtCore.SIGNAL("clicked()"), self.spnPage.stepDown)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(QtGui.QApplication.translate("MainWindow", "MainWindow", None, QtGui.QApplication.UnicodeUTF8))
+        self.toolButton.setText(QtGui.QApplication.translate("MainWindow", "<", None, QtGui.QApplication.UnicodeUTF8))
+        self.toolButton_2.setText(QtGui.QApplication.translate("MainWindow", ">", None, QtGui.QApplication.UnicodeUTF8))
         self.menuThePlace_ru.setTitle(QtGui.QApplication.translate("MainWindow", "ThePlace.ru", None, QtGui.QApplication.UnicodeUTF8))
         self.actionUpdate.setText(QtGui.QApplication.translate("MainWindow", "Update", None, QtGui.QApplication.UnicodeUTF8))
         self.actionExit.setText(QtGui.QApplication.translate("MainWindow", "Exit", None, QtGui.QApplication.UnicodeUTF8))
