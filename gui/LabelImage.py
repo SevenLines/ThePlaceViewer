@@ -1,7 +1,9 @@
 from PySide.QtGui import QLabel, QPixmap
 from PySide.QtCore import Qt
+from PySide.QtGui import QImageReader
 
-from core.image import Image
+from core.theplaceimage import ThePlaceImage
+import os
 
 
 class LabelImage(QLabel):
@@ -24,9 +26,10 @@ class LabelImage(QLabel):
 
     @image.setter
     def image(self, image):
-        assert isinstance(image, Image)
+        assert isinstance(image, ThePlaceImage)
         self._image = image
-        self.setPixmap(QPixmap(image.icon_cache_path))
+        path = os.path.abspath(image.icon_cache_path).replace('\\','/')
+        self.setPixmap(QPixmap(path))
 
     def setPixmap(self, px):
         self._pixmap = px

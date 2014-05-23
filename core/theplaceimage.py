@@ -1,10 +1,15 @@
 import os
 import re
+import PIL
+from PIL import Image
+from PySide.QtGui import QPixmap
+import StringIO
+import sys
 
 from config import *
 
 
-class Image(object):
+class ThePlaceImage(object):
     url_to_icon = ''
     celeb = None
 
@@ -24,10 +29,13 @@ class Image(object):
         if not os.path.exists(d):
             os.makedirs(d)
 
-        with open(self.icon_cache_path, 'w') as f:
+        try:
             b = utls.getPageBytes(self.url_to_icon)
-            f.write(b)
-            f.close()
+            img = Image.open(StringIO.StringIO(b))
+            img.save(self.icon_cache_path)
+        except(IOError):
+            log.error(sys.exc_info())
+            pass
 
     @property
     def full_image_bytes(self):

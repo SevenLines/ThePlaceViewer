@@ -1,0 +1,13 @@
+<RCC>
+  <qresource prefix="/">
+    <file>power.png</file>
+    <file>download.png</file>
+    <file>denied.png</file>
+    <file>arrow-left.png</file>
+    <file>arrow-right.png</file>
+    <file>rainbow.png</file>
+    <file>refresh-01-32.png</file>
+    <file>Refresh.png_32.png</file>
+    <file>loading.png</file>
+  </qresource>
+</RCC>

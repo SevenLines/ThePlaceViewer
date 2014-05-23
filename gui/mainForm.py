@@ -2,6 +2,7 @@ from Queue import Queue
 from threading import Thread
 import threading
 import yaml
+import shutil
 from itertools import product
 
 from PySide.QtCore import QRect
@@ -16,7 +17,7 @@ from gui.LabelProcessAnimation import LabelProcessAnimation
 from gui.processInfoWidget import ProcessInfoWidget
 from gui.ui.mainForm_ui import Ui_MainWindow
 from models.celebritymodel import CelebrityModel
-
+from core.config import *
 
 logging.basicConfig()
 
@@ -50,6 +51,7 @@ class MainForm(QMainWindow, Ui_MainWindow):
     end = False
 
     pages_count_changed = Signal(int)
+    image_added = Signal(ThePlaceImage)
 
     def __init__(self, parent=None):
         Ui_MainWindow.__init__(self)
@@ -66,9 +68,20 @@ class MainForm(QMainWindow, Ui_MainWindow):
         self.spnPage.valueChanged.connect(self.load_images_for_selected)
         self.pages_count_changed.connect(self.set_spnPage_maximum)
         self.lstImages.doubleClicked.connect(self.save_selected_image)
+        self.actionInvalideateCachePage.triggered.connect(self.invalidate_cache_page)
+        self.actionInvalideateCacheCeleb.triggered.connect(self.invalidate_cache_celeb)
 
         self.load_ini()
         self.model.reset_data()
+
+    def invalidate_cache_page(self):
+        celeb = self.get_selected_celeb()
+        self.load_images(celeb, True)
+
+    def invalidate_cache_celeb(self):
+        celeb = self.get_selected_celeb()
+        shutil.rmtree(os.path.join(icons_cache_dir, str(celeb.id)))
+        self.load_images(celeb)
 
     def closeEvent(self, *args, **kwargs):
         if self.last_thread:
@@ -112,6 +125,9 @@ class MainForm(QMainWindow, Ui_MainWindow):
             colsCount = self.lstImages.columnCount()
             rowsCount = self.lstImages.rowCount()
 
+            if rowsCount == 0:
+                return
+
             colsSize = self.lstImages.width() / colsCount \
                        - self.lstImages.verticalScrollBar().width() / colsCount
 
@@ -125,7 +141,7 @@ class MainForm(QMainWindow, Ui_MainWindow):
                     self.lstImages.setCellWidget(y, x, LabelProcessAnimation())
             QApplication.processEvents()
 
-    def read_page(self, celeb):
+    def read_page(self, celeb, invalidate=False):
         assert isinstance(celeb, Celeb)
         icons = get_icons(celeb, self.spnPage.value())
 
@@ -137,10 +153,12 @@ class MainForm(QMainWindow, Ui_MainWindow):
                 log.debug(u"%s thread has been canceled\n" % id(thread))
                 print "breaked"
                 break
-            if not icon.is_cached:
+            if not icon.is_cached or invalidate:
                 icon.update_cached()
+            self.image_added.emit(icon)
             thread.queue.put((i, icon, count))
             thread.queue.join()
+        print "thread end"
 
     def item_selected(self):
         celeb = self.get_selected_celeb()
@@ -151,7 +169,10 @@ class MainForm(QMainWindow, Ui_MainWindow):
         self.load_images(celeb)
 
     def get_selected_celeb(self):
-        index = self.lstCelebs.selectedIndexes()[0]
+        indexes = self.lstCelebs.selectedIndexes()
+        if len(indexes)==0:
+            return None
+        index = indexes[0]
         assert isinstance(index, QModelIndex)
         return index.data(Qt.EditRole)
 
@@ -170,16 +191,18 @@ class MainForm(QMainWindow, Ui_MainWindow):
         self.pages_count_changed.emit(count)
 
     def obtain_pages_count(self, celeb):
-        thread = ThreadCancel(target=self.get_pages_info, args=(celeb, ))
+        thread = Thread(target=self.get_pages_info, args=(celeb, ))
         thread.start()
 
-    def load_images(self, celeb):
-        # load images list
+    def load_images(self, celeb, invalidate=False):
         if self.last_thread:
             self.last_thread.cancel()
             self.last_thread = None
 
-        thread = ThreadCancel(target=self.read_page, args=(celeb,))
+        if not celeb:
+            return
+
+        thread = ThreadCancel(target=self.read_page, args=(celeb, invalidate))
         self.last_thread = thread
         thread.start()
 
@@ -195,7 +218,7 @@ class MainForm(QMainWindow, Ui_MainWindow):
                 if thread.is_canceled():
                     break
             QApplication.processEvents()
-
+        print "complete"
         self.resize_images_list()
 
     def save_image(self, image):

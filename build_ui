@@ -1,3 +1,4 @@
 pyside-uic gui/ui/mainForm.ui -o gui/ui/mainForm_ui.py
 pyside-uic gui/ui/process_info_widget.ui -o gui/ui/process_info_widget_ui.py
 pyside-uic gui/ui/celeb_item_widget.ui -o gui/ui/celeb_item_widget_ui.py
+pyside-rcc -o gui/ui/icons_rc.py assets/icons.qrc

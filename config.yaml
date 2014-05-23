@@ -1,5 +1,5 @@
 MainWindow:
-  Filter: !!python/unicode 'Amy'
+  Filter: !!python/unicode ''
   Geometry: !!python/object/apply:PySide.QtCore.QByteArray
   - !!binary |
-    AdnQywABAAD////3////+AAABV4AAAMIAAAAAAAAAAD////+/////gAAAAACAA==
+    AdnQywABAAAAAABQAAAAEAAAA9wAAAK5AAAAWgAAADAAAAPSAAACrwAAAAAAAA==

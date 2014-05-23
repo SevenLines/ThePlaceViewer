@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'gui/ui/process_info_widget.ui'
 #
-# Created: Fri May 23 03:53:41 2014
+# Created: Sat May 24 02:33:13 2014
 #      by: pyside-uic 0.2.14 running on PySide 1.1.2
 #
 # WARNING! All changes made in this file will be lost!
