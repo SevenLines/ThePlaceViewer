@@ -11,7 +11,7 @@ def get_file_text(path):
 
 class UrlUtils:
     timeout = 30
-    userAgent = "Opera/9.80 (X11; Linux x86_64) Presto/2.12.388 Version/12.15"
+    userAgent = "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:29.0) Gecko/20100101 Firefox/29.0"
     debugLevel = 0
     encoding = "utf-8"
     referer = ''
@@ -30,13 +30,17 @@ class UrlUtils:
     def save_hrefs(self, file_path, tags_list):
         return self.save_attributes(file_path, tags_list, 'href')
 
-    # @staticmethod
     def getPageBytes(self, url):
         h = urllib2.HTTPHandler(debuglevel=self.debugLevel)
         opener = urllib2.build_opener(h)
+
+        # escape not safe symbols
+        url = urllib2.quote(url, safe="%/:=&?~#+!$,;'@()*[]")
         print(url)
+
         request = urllib2.Request(url)
         request.add_header('User-Agent', self.userAgent)
+
         if self.referer:
             request.add_header("Referer", self.referer) # should add, as some sites check for referer to exists
         if self.debugLevel == 1:
@@ -48,11 +52,12 @@ class UrlUtils:
             raise Exception(u"There was an error: %r" % e)
         except socket.timeout, e:
             raise Exception(u"Socket timeout: %r" % e)
-
-        return response.read()
+        out = response.read()
+        response.close()
+        return out
 
     # return page in the specific encoding of self.encoding
     # @staticmethod
-    def getPage(self, url):
+    def getPage(self, url, as_image=False):
         response = self.getPageBytes(url)
         return response.decode(self.encoding, 'ignore')

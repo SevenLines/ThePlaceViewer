@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'gui/ui/celeb_item_widget.ui'
 #
-# Created: Sat May 24 02:33:13 2014
+# Created: Sun May 25 04:02:52 2014
 #      by: pyside-uic 0.2.14 running on PySide 1.1.2
 #
 # WARNING! All changes made in this file will be lost!

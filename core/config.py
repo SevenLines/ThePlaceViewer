@@ -2,7 +2,7 @@ import logging
 from core.utils import UrlUtils
 import os
 
-log = logging.getLogger(__name__)
+
 
 base_url = 'http://www.theplace.ru'
 settings_dir = 'settings'

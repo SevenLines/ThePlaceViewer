@@ -1,12 +1,12 @@
-import os
 import re
-import PIL
 from PIL import Image
-from PySide.QtGui import QPixmap
 import StringIO
 import sys
 
 from config import *
+
+
+log = logging.getLogger(__file__)
 
 
 class ThePlaceImage(object):
@@ -26,8 +26,12 @@ class ThePlaceImage(object):
         updates icon cache
         '''
         d = os.path.dirname(self.icon_cache_path)
-        if not os.path.exists(d):
-            os.makedirs(d)
+        try:
+            if not os.path.exists(d):
+                os.makedirs(d)
+        except OSError:
+            log.error(sys.exc_info())
+            pass
 
         try:
             b = utls.getPageBytes(self.url_to_icon)

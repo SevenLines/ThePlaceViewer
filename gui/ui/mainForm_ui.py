@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'gui/ui/mainForm.ui'
 #
-# Created: Sat May 24 02:33:12 2014
+# Created: Sun May 25 04:02:52 2014
 #      by: pyside-uic 0.2.14 running on PySide 1.1.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -12,7 +12,7 @@ from PySide import QtCore, QtGui
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(492, 378)
+        MainWindow.resize(644, 397)
         self.centralwidget = QtGui.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.gridLayout = QtGui.QGridLayout(self.centralwidget)
@@ -33,20 +33,29 @@ class Ui_MainWindow(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.lstCelebs.sizePolicy().hasHeightForWidth())
         self.lstCelebs.setSizePolicy(sizePolicy)
+        self.lstCelebs.setMaximumSize(QtCore.QSize(165, 16777215))
         self.lstCelebs.setShowGrid(True)
         self.lstCelebs.setGridStyle(QtCore.Qt.SolidLine)
         self.lstCelebs.setObjectName("lstCelebs")
         self.lstCelebs.horizontalHeader().setVisible(False)
         self.lstCelebs.verticalHeader().setVisible(False)
         self.verticalLayout.addWidget(self.lstCelebs)
-        self.gridLayout.addLayout(self.verticalLayout, 0, 0, 2, 1)
-        self.lblCeleb = QtGui.QLabel(self.centralwidget)
-        self.lblCeleb.setText("")
-        self.lblCeleb.setObjectName("lblCeleb")
-        self.gridLayout.addWidget(self.lblCeleb, 0, 1, 2, 2)
-        self.verticalLayout_2 = QtGui.QVBoxLayout()
+        self.gridLayout.addLayout(self.verticalLayout, 0, 0, 1, 1)
+        self.splitImages = QtGui.QSplitter(self.centralwidget)
+        self.splitImages.setOrientation(QtCore.Qt.Horizontal)
+        self.splitImages.setObjectName("splitImages")
+        self.widget = QtGui.QWidget(self.splitImages)
+        self.widget.setObjectName("widget")
+        self.verticalLayout_2 = QtGui.QVBoxLayout(self.widget)
+        self.verticalLayout_2.setContentsMargins(0, 0, 0, 0)
         self.verticalLayout_2.setObjectName("verticalLayout_2")
-        self.lstImages = QtGui.QTableWidget(self.centralwidget)
+        self.lblCeleb = QtGui.QLabel(self.widget)
+        self.lblCeleb.setText("")
+        self.lblCeleb.setScaledContents(False)
+        self.lblCeleb.setAlignment(QtCore.Qt.AlignCenter)
+        self.lblCeleb.setObjectName("lblCeleb")
+        self.verticalLayout_2.addWidget(self.lblCeleb)
+        self.lstImages = QtGui.QTableWidget(self.widget)
         self.lstImages.setStyleSheet("QLabel {\n"
 "    padding:10px;\n"
 "    margin:2px;\n"
@@ -66,7 +75,7 @@ class Ui_MainWindow(object):
         self.horizontalLayout.setObjectName("horizontalLayout")
         spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout.addItem(spacerItem)
-        self.btnPrevious = QtGui.QPushButton(self.centralwidget)
+        self.btnPrevious = QtGui.QPushButton(self.widget)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -81,12 +90,12 @@ class Ui_MainWindow(object):
         self.btnPrevious.setFlat(True)
         self.btnPrevious.setObjectName("btnPrevious")
         self.horizontalLayout.addWidget(self.btnPrevious)
-        self.spnPage = QtGui.QSpinBox(self.centralwidget)
+        self.spnPage = QtGui.QSpinBox(self.widget)
         self.spnPage.setSuffix("")
         self.spnPage.setMinimum(1)
         self.spnPage.setObjectName("spnPage")
         self.horizontalLayout.addWidget(self.spnPage)
-        self.btnNext = QtGui.QPushButton(self.centralwidget)
+        self.btnNext = QtGui.QPushButton(self.widget)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -104,10 +113,21 @@ class Ui_MainWindow(object):
         spacerItem1 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout.addItem(spacerItem1)
         self.verticalLayout_2.addLayout(self.horizontalLayout)
-        self.gridLayout.addLayout(self.verticalLayout_2, 1, 2, 1, 1)
+        self.lblPreview = LabelImage(self.splitImages)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Ignored, QtGui.QSizePolicy.Ignored)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.lblPreview.sizePolicy().hasHeightForWidth())
+        self.lblPreview.setSizePolicy(sizePolicy)
+        self.lblPreview.setMinimumSize(QtCore.QSize(0, 0))
+        self.lblPreview.setMaximumSize(QtCore.QSize(16777215, 16777215))
+        self.lblPreview.setText("")
+        self.lblPreview.setAlignment(QtCore.Qt.AlignCenter)
+        self.lblPreview.setObjectName("lblPreview")
+        self.gridLayout.addWidget(self.splitImages, 0, 1, 1, 1)
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 492, 25))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 644, 25))
         self.menubar.setObjectName("menubar")
         self.menuThePlace_ru = QtGui.QMenu(self.menubar)
         self.menuThePlace_ru.setObjectName("menuThePlace_ru")
@@ -120,7 +140,6 @@ class Ui_MainWindow(object):
         self.toolBar = QtGui.QToolBar(MainWindow)
         self.toolBar.setObjectName("toolBar")
         MainWindow.addToolBar(QtCore.Qt.TopToolBarArea, self.toolBar)
-        MainWindow.insertToolBarBreak(self.toolBar)
         self.actionUpdate = QtGui.QAction(MainWindow)
         self.actionUpdate.setObjectName("actionUpdate")
         self.actionExit = QtGui.QAction(MainWindow)
@@ -186,5 +205,6 @@ class Ui_MainWindow(object):
         self.actionUpdate_database.setText(QtGui.QApplication.translate("MainWindow", "Update database", None, QtGui.QApplication.UnicodeUTF8))
         self.actionUpdate_database.setToolTip(QtGui.QApplication.translate("MainWindow", "Update database", None, QtGui.QApplication.UnicodeUTF8))
 
+from gui.LabelImage import LabelImage
 from gui.label_filter_edit import LabelFilterEdit
 import icons_rc

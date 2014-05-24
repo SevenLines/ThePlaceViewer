@@ -1,5 +1,10 @@
 MainWindow:
-  Filter: !!python/unicode ''
+  Filter: !!python/unicode 'Tay'
   Geometry: !!python/object/apply:PySide.QtCore.QByteArray
   - !!binary |
-    AdnQywABAAAAAABQAAAAEAAAA9wAAAK5AAAAWgAAADAAAAPSAAACrwAAAAAAAA==
+    AdnQywABAAD////5////+AAABRcAAALEAAAAAwAAABgAAAUNAAACugAAAAAAAA==
+  SelectedItem: !!python/unicode 'Taylor Fuchs'
+  SelectedPage: 1
+  splitImagesState: !!python/object/apply:PySide.QtCore.QByteArray
+  - !!binary |
+    AAAA/wAAAAAAAAACAAACNwAAAhEBAAAABgEAAAAB
