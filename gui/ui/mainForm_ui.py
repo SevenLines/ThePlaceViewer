@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'gui/ui/mainForm.ui'
 #
-# Created: Sun May 25 14:56:04 2014
+# Created: Mon May 26 01:43:17 2014
 #      by: pyside-uic 0.2.14 running on PySide 1.1.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -34,6 +34,7 @@ class Ui_MainWindow(object):
         sizePolicy.setHeightForWidth(self.lstCelebs.sizePolicy().hasHeightForWidth())
         self.lstCelebs.setSizePolicy(sizePolicy)
         self.lstCelebs.setMaximumSize(QtCore.QSize(165, 16777215))
+        self.lstCelebs.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
         self.lstCelebs.setShowGrid(True)
         self.lstCelebs.setGridStyle(QtCore.Qt.SolidLine)
         self.lstCelebs.setObjectName("lstCelebs")

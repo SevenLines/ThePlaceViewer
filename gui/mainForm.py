@@ -6,11 +6,10 @@ import threading
 import yaml
 import shutil
 
-from PySide.QtCore import QRect
 from PySide.QtCore import QModelIndex, Signal
 from PySide.QtCore import Qt, QByteArray
 from PySide.QtCore import QEvent
-from PySide.QtGui import QMainWindow, QSortFilterProxyModel, QPixmap
+from PySide.QtGui import QMainWindow, QPixmap
 
 from core.siteparser import *
 from gui.LabelImage import LabelImage
@@ -37,7 +36,6 @@ class ThreadCancel(Thread):
 
 class MainForm(QMainWindow, Ui_MainWindow):
     # FIELDS
-    model = CelebrityModel()
     SETTINGS_FILE = "config.yaml"
     log = logging.getLogger(__name__)
     last_thread = None
@@ -58,14 +56,11 @@ class MainForm(QMainWindow, Ui_MainWindow):
 
         self.processInfoWidget = ProcessInfoWidget()
 
-        self.lstCelebs.setModel(self.model)
         self.edtFilter.textChanged.connect(self.update_filter)
 
-        self.model.modelReset.connect(self.end_load)
-        self.lstCelebs.clicked.connect(self.item_selected)
+        self.lstCelebs.clicked.connect(self.select_current_celeb)
         self.spnPage.valueChanged.connect(self.load_images_for_selected)
         self.pages_count_changed.connect(self.set_spnPage_maximum)
-        # self.lstImages.doubleClicked.connect(self.save_selected_image)
         self.lstImages.clicked.connect(self.image_selected)
         self.actionInvalideateCachePage.triggered.connect(self.invalidate_cache_page)
         self.actionInvalideateCacheCeleb.triggered.connect(self.invalidate_cache_celeb)
@@ -77,8 +72,13 @@ class MainForm(QMainWindow, Ui_MainWindow):
         self.lstImages.installEventFilter(self)
         self.lblPreview.hide_icons = True
 
+        #load model
+        self.model = CelebrityModel()
+        self.model.data_obtained.connect(self.load_model_ini)
+        self.model.data_obtained.connect(self.end_load)
+        self.lstCelebs.setModel(self.model)
+
         self.load_ini()
-        self.model.reset_data()
 
     def eventFilter(self, obj, event):
         assert isinstance(event, QEvent)
@@ -86,8 +86,6 @@ class MainForm(QMainWindow, Ui_MainWindow):
             self.resize_images_list()
             return True
         return False
-        # super(MainForm, self).eventFilter(*obj, **kwargs)
-
 
     def resize_image_list_to_count(self, count):
         """
@@ -100,14 +98,14 @@ class MainForm(QMainWindow, Ui_MainWindow):
         """
         сбрасывает кеш текущей страницы с изображениями
         """
-        celeb = self.get_selected_celeb()
+        celeb = self.selected_celeb
         self.load_images(celeb, True)
 
     def invalidate_cache_celeb(self):
         """
         сбрасывает кеш для текущей знаменитости
         """
-        celeb = self.get_selected_celeb()
+        celeb = self.selected_celeb
         shutil.rmtree(os.path.join(icons_cache_dir, str(celeb.id)))
         self.load_images(celeb)
 
@@ -205,7 +203,6 @@ class MainForm(QMainWindow, Ui_MainWindow):
         icons = get_icons(celeb, self.spnPage.value())
 
         thread = threading.current_thread()
-        # print id(thread)
         first_time = True
         for i, (icon, count) in enumerate(icons):
             th = Thread(target=self.load_image, args=(i, icon, count, invalidate ))
@@ -219,19 +216,20 @@ class MainForm(QMainWindow, Ui_MainWindow):
             th.start()
 
         self.images_loaded.emit()
-        print log.debug("thread end")
+        log.debug("thread end")
 
-    def item_selected(self):
+    def select_current_celeb(self, reset_paginator=True):
         """
         реакция на выбор знаменитости
         """
-        # gc.collect()
-        celeb = self.get_selected_celeb()
+        celeb = self.selected_celeb
         assert isinstance(celeb, Celeb)
         self.lblCeleb.setText(celeb.full_name)
         self.obtain_pages_count(celeb)
 
-        self.spnPage.setValue(1)
+        if reset_paginator:
+            self.spnPage.setValue(1)
+
         self.load_images(celeb)
 
     def show_image(self, data, image):
@@ -256,15 +254,16 @@ class MainForm(QMainWindow, Ui_MainWindow):
         thread.start()
 
 
-    def get_selected_celeb(self):
+    @property
+    def selected_celeb(self):
         """
         возвращает выбранную знаменитость
         :return: Celeb
         """
-        indexes = self.lstCelebs.selectedIndexes()
-        if len(indexes) == 0:
-            return None
-        index = indexes[0]
+        # indexes =
+        # if len(indexes) == 0:
+        #     return None
+        index = self.lstCelebs.currentIndex()
         assert isinstance(index, QModelIndex)
         return index.data(Qt.EditRole)
 
@@ -280,7 +279,7 @@ class MainForm(QMainWindow, Ui_MainWindow):
         return label.image
 
     def load_images_for_selected(self):
-        celeb = self.get_selected_celeb()
+        celeb = self.selected_celeb
         self.load_images(celeb)
 
     def get_pages_info(self, celeb):
@@ -320,7 +319,6 @@ class MainForm(QMainWindow, Ui_MainWindow):
 
     def end_load(self):
         self.lstCelebs.resizeColumnsToContents()
-        # self.processInfoWidget.hide()
 
     def update_filter(self):
         text = self.edtFilter.text()
@@ -332,7 +330,7 @@ class MainForm(QMainWindow, Ui_MainWindow):
             'Geometry': self.saveGeometry(),
             'Filter': self.edtFilter.text(),
             'splitImagesState': self.splitImages.saveState(),
-            'SelectedItem': self.get_selected_celeb().full_name if self.get_selected_celeb() else '',
+            'SelectedItem': self.selected_celeb.full_name if self.selected_celeb else '',
             'SelectedPage': self.spnPage.value(),
         }
 
@@ -340,35 +338,49 @@ class MainForm(QMainWindow, Ui_MainWindow):
         f.write(yaml.dump(s))
         f.close()
 
-    def load_ini(self):
+    @property
+    def settings(self):
         try:
             s = yaml.load(open(self.SETTINGS_FILE))
         except IOError as e:
-            return
-
+            return None
         s['MainWindow'] = defaultdict(int, s['MainWindow'])
+        return s
+
+    def load_model_ini(self):
+        if not hasattr(self, 'loaded_model_ini'):
+            self.loaded_model_ini = True
+            s = self.settings
+            if 'SelectedItem' in s['MainWindow']:
+                self.select_celeb_by_name(s['MainWindow']['SelectedItem'])
+
+            if 'SelectedPage' in s['MainWindow']:
+                self.spnPage.setValue(s['MainWindow']['SelectedPage'])
+
+
+    def load_ini(self):
+        s = self.settings
         self.restoreGeometry(s['MainWindow']['Geometry'] or None)
-        self.splitImages.restoreState(s['MainWindow']['splitImagesState'] or None)
-        # if 'SelectedItem' in s['MainWindow']:
-        #     self.select_celeb(s['MainWindow']['SelectedItem'])
-        #
-        # if 'SelectedPage' in s['MainWindow']:
-        #     self.spnPage.setValue(s['MainWindow']['SelectedPage'])
 
         self.edtFilter.setText(s['MainWindow']['Filter'] or '')
         self.update_filter()
 
-    def select_celeb(self, full_name):
+        self.splitImages.restoreState(s['MainWindow']['splitImagesState'] or None)
+
+
+    def select_celeb_by_name(self, full_name):
+        if not full_name:
+            return
+
         assert isinstance(self.model, CelebrityModel)
+
         for row in xrange(self.model.rowCount()):
-            index = self.model.index(0, row)
+            index = self.lstCelebs.model().index(row, 0, QModelIndex())
             assert isinstance(index, QModelIndex)
-            s = index.data(Qt.DisplayRole)
-            print s, full_name
+            s = self.model.data(index, Qt.DisplayRole)
             if s == full_name:
-                print 'find'
-                self.lstCeleb.setCurrentIndex(index)
+                if index.isValid():
+                    self.lstCelebs.setCurrentIndex(index)
+                    self.lstCelebs.scrollTo(index)
+                self.select_current_celeb(False)
                 return
-
-
-

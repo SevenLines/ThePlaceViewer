@@ -2,7 +2,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm.session import sessionmaker, Session
 from threading import Thread
 
-from PySide.QtCore import QAbstractListModel, QModelIndex, Qt
+from PySide.QtCore import QAbstractListModel, QModelIndex, Qt, Signal
 
 from models.theplace import Celeb, engine
 
@@ -14,12 +14,13 @@ class CelebrityModel(QAbstractListModel):
     cancel_loading = True
     current_thread = None
 
+    data_obtained = Signal()
+
     def __init__(self, auto_connect=False, parent=None):
         QAbstractListModel.__init__(self, parent)
         if auto_connect:
             self.reset_data()
 
-    @staticmethod
     def read_celebs(self):
         session = sessionmaker(bind=engine)
         session = session()
@@ -39,6 +40,7 @@ class CelebrityModel(QAbstractListModel):
 
             self.endResetModel()
         session.close()
+        self.data_obtained.emit()
 
 
     def reset_data(self):
@@ -48,7 +50,7 @@ class CelebrityModel(QAbstractListModel):
             current_thread = None
         self.cancel_loading = False
 
-        thread = Thread(target=self.read_celebs, args=(self, ))
+        thread = Thread(target=self.read_celebs)
         self.current_thread = thread
         thread.start()
 

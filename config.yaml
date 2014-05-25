@@ -1,10 +1,10 @@
 MainWindow:
-  Filter: !!python/unicode 'Lima'
+  Filter: !!python/unicode ''
   Geometry: !!python/object/apply:PySide.QtCore.QByteArray
   - !!binary |
-    AdnQywABAAD////5////+AAABRcAAALEAAAAAwAAABgAAAUNAAACugAAAAAAAA==
-  SelectedItem: !!python/unicode 'Adriana Lima'
-  SelectedPage: 38
+    AdnQywABAAAAAAAgAAAADQAABLQAAALZAAAAKgAAAC0AAASqAAACzwAAAAAAAA==
+  SelectedItem: !!python/unicode 'Kate Walsh'
+  SelectedPage: 4
   splitImagesState: !!python/object/apply:PySide.QtCore.QByteArray
   - !!binary |
-    AAAA/wAAAAAAAAACAAAB+AAAAlABAAAABgEAAAAB
+    AAAA/wAAAAAAAAACAAACEAAAAa4BAAAABgEAAAAB

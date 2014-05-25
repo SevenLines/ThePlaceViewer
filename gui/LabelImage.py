@@ -43,6 +43,7 @@ class LabelImage(QLabel):
         self.download_started.connect(self.start_load_anim)
         self.download_started.connect(self.btnDownload.hide)
         self.download_started.connect(self.lblLoadProcess.show)
+        # self.destroyed.connect(self.on_destroyed)
 
     def start_load_anim(self):
         self.lblLoadProcess.movie().start()
