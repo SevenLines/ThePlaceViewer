@@ -13,6 +13,7 @@ from PySide.QtGui import QMainWindow, QPixmap
 
 from core.siteparser import *
 from gui.LabelImage import LabelImage
+from gui.SettingsDialog import SettingsDialog
 from gui.processInfoWidget import ProcessInfoWidget
 from gui.ui.mainForm_ui import Ui_MainWindow
 from models.celebritymodel import CelebrityModel
@@ -50,29 +51,34 @@ class MainForm(QMainWindow, Ui_MainWindow):
     image_downloaded = Signal(QByteArray, ThePlaceImage)
 
     def __init__(self, parent=None):
-        Ui_MainWindow.__init__(self)
-        QMainWindow.__init__(self, parent)
+        super(MainForm, self).__init__(parent)
         self.setupUi(self)
 
-        self.processInfoWidget = ProcessInfoWidget()
+        # self.processInfoWidget = ProcessInfoWidget()
 
+        # widget setups
+        self.lstImages.installEventFilter(self)
+        self.lblPreview.hide_icons = True
+
+        # widgets signals
         self.edtFilter.textChanged.connect(self.update_filter)
-
         self.lstCelebs.clicked.connect(self.select_current_celeb)
         self.spnPage.valueChanged.connect(self.load_images_for_selected)
-        self.pages_count_changed.connect(self.set_spnPage_maximum)
         self.lstImages.clicked.connect(self.image_selected)
+
+        # actions
         self.actionInvalideateCachePage.triggered.connect(self.invalidate_cache_page)
         self.actionInvalideateCacheCeleb.triggered.connect(self.invalidate_cache_celeb)
+        self.actionSettings.triggered.connect(self.show_settings)
+
+        # self signals
         self.image_downloaded.connect(self.show_image)
         self.image_added.connect(self.add_image)
         self.images_count_obtained.connect(self.resize_image_list_to_count)
         self.images_loaded.connect(self.resize_images_list)
+        self.pages_count_changed.connect(self.set_spnPage_maximum)
 
-        self.lstImages.installEventFilter(self)
-        self.lblPreview.hide_icons = True
-
-        #load model
+        # load model
         self.model = CelebrityModel()
         self.model.data_obtained.connect(self.load_model_ini)
         self.model.data_obtained.connect(self.end_load)
@@ -223,6 +229,9 @@ class MainForm(QMainWindow, Ui_MainWindow):
         реакция на выбор знаменитости
         """
         celeb = self.selected_celeb
+
+        self.lastName = celeb.full_name if celeb else ''
+
         assert isinstance(celeb, Celeb)
         self.lblCeleb.setText(celeb.full_name)
         self.obtain_pages_count(celeb)
@@ -319,10 +328,14 @@ class MainForm(QMainWindow, Ui_MainWindow):
 
     def end_load(self):
         self.lstCelebs.resizeColumnsToContents()
+        if not hasattr(self, 'lastName'):
+            self.lastName = ''
+        self.select_celeb_by_name(self.lastName, False)
 
     def update_filter(self):
         text = self.edtFilter.text()
         self.model.set_filter(text)
+
 
     def save_ini(self):
         s = dict()
@@ -333,6 +346,8 @@ class MainForm(QMainWindow, Ui_MainWindow):
             'SelectedItem': self.selected_celeb.full_name if self.selected_celeb else '',
             'SelectedPage': self.spnPage.value(),
         }
+
+        save_config(s)
 
         f = open(self.SETTINGS_FILE, 'w')
         f.write(yaml.dump(s))
@@ -360,6 +375,7 @@ class MainForm(QMainWindow, Ui_MainWindow):
 
     def load_ini(self):
         s = self.settings
+        load_config(s)
         self.restoreGeometry(s['MainWindow']['Geometry'] or None)
 
         self.edtFilter.setText(s['MainWindow']['Filter'] or '')
@@ -368,7 +384,7 @@ class MainForm(QMainWindow, Ui_MainWindow):
         self.splitImages.restoreState(s['MainWindow']['splitImagesState'] or None)
 
 
-    def select_celeb_by_name(self, full_name):
+    def select_celeb_by_name(self, full_name, load_images=True):
         if not full_name:
             return
 
@@ -382,5 +398,11 @@ class MainForm(QMainWindow, Ui_MainWindow):
                 if index.isValid():
                     self.lstCelebs.setCurrentIndex(index)
                     self.lstCelebs.scrollTo(index)
-                self.select_current_celeb(False)
+                if load_images:
+                    self.select_current_celeb(False)
                 return
+
+
+    def show_settings(self):
+        dialog = SettingsDialog()
+        dialog.exec_()

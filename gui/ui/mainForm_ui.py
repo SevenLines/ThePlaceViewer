@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'gui/ui/mainForm.ui'
 #
-# Created: Mon May 26 01:43:17 2014
+# Created: Mon May 26 03:07:25 2014
 #      by: pyside-uic 0.2.14 running on PySide 1.1.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -132,6 +132,8 @@ class Ui_MainWindow(object):
         self.menuThePlace_ru.setObjectName("menuThePlace_ru")
         self.menuIvalidateCache = QtGui.QMenu(self.menuThePlace_ru)
         self.menuIvalidateCache.setObjectName("menuIvalidateCache")
+        self.menuSettings = QtGui.QMenu(self.menubar)
+        self.menuSettings.setObjectName("menuSettings")
         MainWindow.setMenuBar(self.menubar)
         self.statusbar = QtGui.QStatusBar(MainWindow)
         self.statusbar.setObjectName("statusbar")
@@ -166,6 +168,8 @@ class Ui_MainWindow(object):
         icon6.addPixmap(QtGui.QPixmap(":/download.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.actionUpdate_database.setIcon(icon6)
         self.actionUpdate_database.setObjectName("actionUpdate_database")
+        self.actionSettings = QtGui.QAction(MainWindow)
+        self.actionSettings.setObjectName("actionSettings")
         self.menuIvalidateCache.addAction(self.actionInvalideateCachePage)
         self.menuIvalidateCache.addAction(self.actionInvalideateCacheCeleb)
         self.menuIvalidateCache.addSeparator()
@@ -174,7 +178,9 @@ class Ui_MainWindow(object):
         self.menuThePlace_ru.addAction(self.menuIvalidateCache.menuAction())
         self.menuThePlace_ru.addSeparator()
         self.menuThePlace_ru.addAction(self.actionExit)
+        self.menuSettings.addAction(self.actionSettings)
         self.menubar.addAction(self.menuThePlace_ru.menuAction())
+        self.menubar.addAction(self.menuSettings.menuAction())
         self.toolBar.addAction(self.actionUpdate_database)
         self.toolBar.addSeparator()
         self.toolBar.addAction(self.actionInvalideateCacheAll)
@@ -191,6 +197,7 @@ class Ui_MainWindow(object):
         MainWindow.setWindowTitle(QtGui.QApplication.translate("MainWindow", "MainWindow", None, QtGui.QApplication.UnicodeUTF8))
         self.menuThePlace_ru.setTitle(QtGui.QApplication.translate("MainWindow", "ThePlace.ru", None, QtGui.QApplication.UnicodeUTF8))
         self.menuIvalidateCache.setTitle(QtGui.QApplication.translate("MainWindow", "Invalidate Cache", None, QtGui.QApplication.UnicodeUTF8))
+        self.menuSettings.setTitle(QtGui.QApplication.translate("MainWindow", "About", None, QtGui.QApplication.UnicodeUTF8))
         self.toolBar.setWindowTitle(QtGui.QApplication.translate("MainWindow", "toolBar", None, QtGui.QApplication.UnicodeUTF8))
         self.actionUpdate.setText(QtGui.QApplication.translate("MainWindow", "Update", None, QtGui.QApplication.UnicodeUTF8))
         self.actionExit.setText(QtGui.QApplication.translate("MainWindow", "Exit", None, QtGui.QApplication.UnicodeUTF8))
@@ -203,6 +210,7 @@ class Ui_MainWindow(object):
         self.actionInvalideateCacheCeleb.setToolTip(QtGui.QApplication.translate("MainWindow", "Refresh celeb", None, QtGui.QApplication.UnicodeUTF8))
         self.actionUpdate_database.setText(QtGui.QApplication.translate("MainWindow", "Update database", None, QtGui.QApplication.UnicodeUTF8))
         self.actionUpdate_database.setToolTip(QtGui.QApplication.translate("MainWindow", "Update database", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionSettings.setText(QtGui.QApplication.translate("MainWindow", "Settings", None, QtGui.QApplication.UnicodeUTF8))
 
 from gui.LabelImage import LabelImage
 from gui.label_filter_edit import LabelFilterEdit

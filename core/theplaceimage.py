@@ -19,7 +19,7 @@ class ThePlaceImage(object):
 
     @property
     def name(self):
-        return self.url_to_icon.split('/')[-1]
+        return self.full_image_url.split('/')[-1]
 
     def update_cached(self):
         '''

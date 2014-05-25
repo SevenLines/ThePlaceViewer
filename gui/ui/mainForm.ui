@@ -271,7 +271,14 @@
     <addaction name="separator"/>
     <addaction name="actionExit"/>
    </widget>
+   <widget class="QMenu" name="menuSettings">
+    <property name="title">
+     <string>About</string>
+    </property>
+    <addaction name="actionSettings"/>
+   </widget>
    <addaction name="menuThePlace_ru"/>
+   <addaction name="menuSettings"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <widget class="QToolBar" name="toolBar">
@@ -353,6 +360,11 @@
    </property>
    <property name="toolTip">
     <string>Update database</string>
+   </property>
+  </action>
+  <action name="actionSettings">
+   <property name="text">
+    <string>Settings</string>
    </property>
   </action>
  </widget>

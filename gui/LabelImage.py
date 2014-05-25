@@ -6,7 +6,7 @@ from PySide.QtCore import Qt, Signal, QSize
 from PySide.QtGui import QImageReader
 
 from core.theplaceimage import ThePlaceImage
-from core.config import *
+from core import config
 
 
 class LabelImage(QLabel):
@@ -53,7 +53,7 @@ class LabelImage(QLabel):
 
     @property
     def save_path(self):
-        return os.path.join(save_dir, self._image.celeb.full_name, self._image.name)
+        return os.path.join(config.save_dir, self._image.celeb.full_name, self._image.name)
 
     def save_image_thread_callback(self):
         self.download_started.emit()
