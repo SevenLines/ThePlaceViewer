@@ -1,5 +1,8 @@
 <RCC>
   <qresource prefix="/">
+    <file>loading.gif</file>
+    <file>check.png</file>
+    <file>folder.png</file>
     <file>power.png</file>
     <file>download.png</file>
     <file>denied.png</file>

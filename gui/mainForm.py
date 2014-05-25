@@ -43,16 +43,13 @@ class MainForm(QMainWindow, Ui_MainWindow):
     last_thread = None
     images_count = 0
     last_image = None
-    columns_count = 3
-    rows_count = 3
-    save_dir = "output"
 
     # SIGNALS
     pages_count_changed = Signal(int)
     image_added = Signal(int, ThePlaceImage, int)
     images_count_obtained = Signal(int)
     images_loaded = Signal()
-    image_downloaded = Signal(QByteArray)
+    image_downloaded = Signal(QByteArray, ThePlaceImage)
 
     def __init__(self, parent=None):
         Ui_MainWindow.__init__(self)
@@ -68,7 +65,7 @@ class MainForm(QMainWindow, Ui_MainWindow):
         self.lstCelebs.clicked.connect(self.item_selected)
         self.spnPage.valueChanged.connect(self.load_images_for_selected)
         self.pages_count_changed.connect(self.set_spnPage_maximum)
-        self.lstImages.doubleClicked.connect(self.save_selected_image)
+        # self.lstImages.doubleClicked.connect(self.save_selected_image)
         self.lstImages.clicked.connect(self.image_selected)
         self.actionInvalideateCachePage.triggered.connect(self.invalidate_cache_page)
         self.actionInvalideateCacheCeleb.triggered.connect(self.invalidate_cache_celeb)
@@ -78,6 +75,7 @@ class MainForm(QMainWindow, Ui_MainWindow):
         self.images_loaded.connect(self.resize_images_list)
 
         self.lstImages.installEventFilter(self)
+        self.lblPreview.hide_icons = True
 
         self.load_ini()
         self.model.reset_data()
@@ -137,13 +135,15 @@ class MainForm(QMainWindow, Ui_MainWindow):
         :param icon: изображение
         :param count: максимальное кол-во изображений
         """
-        print i, count, icon
+        log.debug("%s %s %s" % (i, count, icon))
         label = LabelImage()
+        label.setToolTip(icon.name)
         label.image = icon
+        label.button_download_clicked.connect(label.setFocus)
         label.setAlignment(Qt.AlignCenter)
 
-        row = i / self.columns_count
-        col = i % self.columns_count
+        row = i / columns_count
+        col = i % columns_count
 
         self.lstImages.setCellWidget(row, col, label)
 
@@ -164,8 +164,8 @@ class MainForm(QMainWindow, Ui_MainWindow):
             #     del widget
             self.lstImages.clear()
 
-            self.lstImages.setRowCount(count / self.columns_count)
-            self.lstImages.setColumnCount(self.columns_count)
+            self.lstImages.setRowCount(count / columns_count)
+            self.lstImages.setColumnCount(columns_count)
             self.lstImages.selectRow(0)
             self.lstImages.clearSelection()
             # self.lstImages.repaint()
@@ -182,7 +182,7 @@ class MainForm(QMainWindow, Ui_MainWindow):
         for i in xrange(colsCount):
             self.lstImages.setColumnWidth(i, colsSize)
         for i in xrange(rowsCount):
-            self.lstImages.setRowHeight(i, self.lstImages.height() / self.rows_count)
+            self.lstImages.setRowHeight(i, self.lstImages.height() / rows_count)
 
         # if as_empty:
         #     for x, y in product(xrange(colsCount), xrange(rowsCount)):
@@ -205,13 +205,13 @@ class MainForm(QMainWindow, Ui_MainWindow):
         icons = get_icons(celeb, self.spnPage.value())
 
         thread = threading.current_thread()
-        print id(thread)
+        # print id(thread)
         first_time = True
         for i, (icon, count) in enumerate(icons):
             th = Thread(target=self.load_image, args=(i, icon, count, invalidate ))
             if thread.is_canceled():
                 log.debug(u"%s thread has been canceled\n" % id(thread))
-                print "breaked"
+                log.debug("breaked")
                 break
             if first_time:
                 self.images_count_obtained.emit(count)
@@ -219,7 +219,7 @@ class MainForm(QMainWindow, Ui_MainWindow):
             th.start()
 
         self.images_loaded.emit()
-        print "thread end"
+        print log.debug("thread end")
 
     def item_selected(self):
         """
@@ -234,14 +234,14 @@ class MainForm(QMainWindow, Ui_MainWindow):
         self.spnPage.setValue(1)
         self.load_images(celeb)
 
-    def show_image(self, data):
+    def show_image(self, data, image):
         px = QPixmap()
         px.loadFromData(data)
         self.lblPreview.setPixmap(px)
 
     def download_image(self, image):
         b = image.full_image_bytes
-        self.image_downloaded.emit(b)
+        self.image_downloaded.emit(b, image)
 
     def image_selected(self):
         image = self.selected_image
@@ -249,6 +249,7 @@ class MainForm(QMainWindow, Ui_MainWindow):
         if self.last_image == image:
             return
 
+        self.lblPreview.setPixmap(None)
         self.last_image = image
 
         thread = Thread(target=self.download_image, args=(image, ))
@@ -316,12 +317,6 @@ class MainForm(QMainWindow, Ui_MainWindow):
         image = self.selected_image
         thread = ThreadCancel(target=self.save_image, args=(image, ))
         thread.start()
-
-    def begin_process(self):
-        self.processInfoWidget.setParent(self.lstCelebs)
-        self.processInfoWidget.setGeometry(
-            QRect(0, 0, self.lstCelebs.width(), self.lstCelebs.height()))
-        self.processInfoWidget.show()
 
     def end_load(self):
         self.lstCelebs.resizeColumnsToContents()

@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'gui/ui/mainForm.ui'
 #
-# Created: Sun May 25 04:02:52 2014
+# Created: Sun May 25 14:56:04 2014
 #      by: pyside-uic 0.2.14 running on PySide 1.1.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -44,23 +44,21 @@ class Ui_MainWindow(object):
         self.splitImages = QtGui.QSplitter(self.centralwidget)
         self.splitImages.setOrientation(QtCore.Qt.Horizontal)
         self.splitImages.setObjectName("splitImages")
-        self.widget = QtGui.QWidget(self.splitImages)
-        self.widget.setObjectName("widget")
-        self.verticalLayout_2 = QtGui.QVBoxLayout(self.widget)
+        self.layoutWidget = QtGui.QWidget(self.splitImages)
+        self.layoutWidget.setObjectName("layoutWidget")
+        self.verticalLayout_2 = QtGui.QVBoxLayout(self.layoutWidget)
         self.verticalLayout_2.setContentsMargins(0, 0, 0, 0)
         self.verticalLayout_2.setObjectName("verticalLayout_2")
-        self.lblCeleb = QtGui.QLabel(self.widget)
+        self.lblCeleb = QtGui.QLabel(self.layoutWidget)
         self.lblCeleb.setText("")
         self.lblCeleb.setScaledContents(False)
         self.lblCeleb.setAlignment(QtCore.Qt.AlignCenter)
         self.lblCeleb.setObjectName("lblCeleb")
         self.verticalLayout_2.addWidget(self.lblCeleb)
-        self.lstImages = QtGui.QTableWidget(self.widget)
-        self.lstImages.setStyleSheet("QLabel {\n"
+        self.lstImages = QtGui.QTableWidget(self.layoutWidget)
+        self.lstImages.setStyleSheet("LabelImage {\n"
 "    padding:10px;\n"
-"    margin:2px;\n"
-"    border: 1px solid gray;\n"
-"    border-radius: 16px;\n"
+"    border: 1px solid black;\n"
 "}")
         self.lstImages.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
         self.lstImages.setGridStyle(QtCore.Qt.NoPen)
@@ -75,7 +73,7 @@ class Ui_MainWindow(object):
         self.horizontalLayout.setObjectName("horizontalLayout")
         spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout.addItem(spacerItem)
-        self.btnPrevious = QtGui.QPushButton(self.widget)
+        self.btnPrevious = QtGui.QPushButton(self.layoutWidget)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -90,12 +88,12 @@ class Ui_MainWindow(object):
         self.btnPrevious.setFlat(True)
         self.btnPrevious.setObjectName("btnPrevious")
         self.horizontalLayout.addWidget(self.btnPrevious)
-        self.spnPage = QtGui.QSpinBox(self.widget)
+        self.spnPage = QtGui.QSpinBox(self.layoutWidget)
         self.spnPage.setSuffix("")
         self.spnPage.setMinimum(1)
         self.spnPage.setObjectName("spnPage")
         self.horizontalLayout.addWidget(self.spnPage)
-        self.btnNext = QtGui.QPushButton(self.widget)
+        self.btnNext = QtGui.QPushButton(self.layoutWidget)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
