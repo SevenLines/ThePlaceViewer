@@ -1,7 +1,7 @@
 import os
 
 from PySide.QtGui import QDialog, QFileDialog
-from core import config
+from core.config import config
 
 from gui.ui.settings_dialog_ui import Ui_SettingsDialog
 

@@ -94,6 +94,12 @@ class Celeb(Base):
     def get_page_url(self, page_num):
         return core.siteparser.get_page_url(self.id, page_num)
 
+def create_database():
+    try:
+        Base.metadata.create_all(engine)
+    except:
+        log.error(sys.exc_info())
+
 def main():
     argv = sys.argv
     if not len(argv):

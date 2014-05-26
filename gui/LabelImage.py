@@ -1,12 +1,18 @@
 from threading import Thread
-import os
+import os, sys
+import logging
+from io import BytesIO
 
 from PySide.QtGui import QLabel, QPixmap, QPushButton, QIcon, QMovie
 from PySide.QtCore import Qt, Signal, QSize
 from PySide.QtGui import QImageReader
 
+from PIL import Image
+
 from core.theplaceimage import ThePlaceImage
-from core import config
+from core.config import config
+
+log = logging.getLogger(__name__)
 
 
 class LabelImage(QLabel):
@@ -63,11 +69,17 @@ class LabelImage(QLabel):
         if not os.path.exists(os.path.dirname(path)):
             os.makedirs(os.path.dirname(path))
 
-        f = open(path, 'w')
-        f.write(b)
-        f.close()
+        img = Image.open(BytesIO(b))
+        img.save(self.save_path)
 
-        self.download_ended.emit()
+        # f = open(path, 'w')
+        # f.write(b)
+        # f.close()
+        try:
+            self.download_ended.emit()
+        except RuntimeError as e:
+            log.debug(sys.exc_traceback)
+            log.debug(sys.exc_info())
 
     def save_image(self):
         thread = Thread(target=self.save_image_thread_callback)

@@ -5,24 +5,23 @@ from threading import Thread
 import threading
 import yaml
 import shutil
+import logging
 
 from PySide.QtCore import QModelIndex, Signal
 from PySide.QtCore import Qt, QByteArray
 from PySide.QtCore import QEvent
-from PySide.QtGui import QMainWindow, QPixmap
+from PySide.QtGui import QMainWindow, QPixmap, QKeyEvent
 
 from core.siteparser import *
 from gui.LabelImage import LabelImage
 from gui.SettingsDialog import SettingsDialog
-from gui.processInfoWidget import ProcessInfoWidget
 from gui.ui.mainForm_ui import Ui_MainWindow
 from models.celebritymodel import CelebrityModel
-from core.config import *
-
+from core.config import config
+import models.theplace as db
 
 logging.basicConfig()
 log = logging.getLogger(__name__)
-
 
 class ThreadCancel(Thread):
     _cancel = False
@@ -58,6 +57,7 @@ class MainForm(QMainWindow, Ui_MainWindow):
 
         # widget setups
         self.lstImages.installEventFilter(self)
+        self.edtFilter.installEventFilter(self)
         self.lblPreview.hide_icons = True
 
         # widgets signals
@@ -70,6 +70,7 @@ class MainForm(QMainWindow, Ui_MainWindow):
         self.actionInvalideateCachePage.triggered.connect(self.invalidate_cache_page)
         self.actionInvalideateCacheCeleb.triggered.connect(self.invalidate_cache_celeb)
         self.actionSettings.triggered.connect(self.show_settings)
+        self.actionUpdate_database.triggered.connect(self.update_database)
 
         # self signals
         self.image_downloaded.connect(self.show_image)
@@ -86,12 +87,23 @@ class MainForm(QMainWindow, Ui_MainWindow):
 
         self.load_ini()
 
+    def update_database(self):
+        if not os.path.exists("theplace.db"):
+            db.create_database()
+        db.Celeb.fill_database()
+
     def eventFilter(self, obj, event):
         assert isinstance(event, QEvent)
-        if event.type() == QEvent.Resize:
-            self.resize_images_list()
-            return True
-        return False
+        if obj == self.lstImages:
+            if event.type() == QEvent.Resize:
+                self.resize_images_list()
+                return True
+        if obj == self.edtFilter:
+            if event.type() == QEvent.KeyPress:
+                assert isinstance(event, QKeyEvent)
+                if event.key() == Qt.Key_Return:
+                    self.select_next_item(asc=not (event.modifiers() & Qt.ShiftModifier))
+        return super(MainForm, self).eventFilter(obj, event)
 
     def resize_image_list_to_count(self, count):
         """
@@ -112,7 +124,7 @@ class MainForm(QMainWindow, Ui_MainWindow):
         сбрасывает кеш для текущей знаменитости
         """
         celeb = self.selected_celeb
-        shutil.rmtree(os.path.join(icons_cache_dir, str(celeb.id)))
+        shutil.rmtree(os.path.join(config.icons_cache_dir, str(celeb.id)))
         self.load_images(celeb)
 
     def closeEvent(self, *args, **kwargs):
@@ -146,8 +158,8 @@ class MainForm(QMainWindow, Ui_MainWindow):
         label.button_download_clicked.connect(label.setFocus)
         label.setAlignment(Qt.AlignCenter)
 
-        row = i / columns_count
-        col = i % columns_count
+        row = i / config.columns_count
+        col = i % config.columns_count
 
         self.lstImages.setCellWidget(row, col, label)
 
@@ -168,8 +180,8 @@ class MainForm(QMainWindow, Ui_MainWindow):
             #     del widget
             self.lstImages.clear()
 
-            self.lstImages.setRowCount(count / columns_count)
-            self.lstImages.setColumnCount(columns_count)
+            self.lstImages.setRowCount(count / config.columns_count)
+            self.lstImages.setColumnCount(config.columns_count)
             self.lstImages.selectRow(0)
             self.lstImages.clearSelection()
             # self.lstImages.repaint()
@@ -186,7 +198,7 @@ class MainForm(QMainWindow, Ui_MainWindow):
         for i in xrange(colsCount):
             self.lstImages.setColumnWidth(i, colsSize)
         for i in xrange(rowsCount):
-            self.lstImages.setRowHeight(i, self.lstImages.height() / rows_count)
+            self.lstImages.setRowHeight(i, self.lstImages.height() / config.rows_count)
 
         # if as_empty:
         #     for x, y in product(xrange(colsCount), xrange(rowsCount)):
@@ -347,7 +359,7 @@ class MainForm(QMainWindow, Ui_MainWindow):
             'SelectedPage': self.spnPage.value(),
         }
 
-        save_config(s)
+        config.save_config(s)
 
         f = open(self.SETTINGS_FILE, 'w')
         f.write(yaml.dump(s))
@@ -375,7 +387,7 @@ class MainForm(QMainWindow, Ui_MainWindow):
 
     def load_ini(self):
         s = self.settings
-        load_config(s)
+        config.load_config(s)
         self.restoreGeometry(s['MainWindow']['Geometry'] or None)
 
         self.edtFilter.setText(s['MainWindow']['Filter'] or '')
@@ -401,6 +413,24 @@ class MainForm(QMainWindow, Ui_MainWindow):
                 if load_images:
                     self.select_current_celeb(False)
                 return
+
+    def select_next_item(self, asc=True, load_images=True):
+        count = self.lstCelebs.model().rowCount()
+        if count == 0:
+            return
+
+        curIndex = self.lstCelebs.currentIndex()
+
+        if asc:
+            row = (curIndex.row() + 1) % count if curIndex.isValid() else 0
+        else:
+            row = (curIndex.row() - 1) % count if curIndex.isValid() else 0
+
+        index = self.lstCelebs.model().index(row, 0, QModelIndex())
+        if index.isValid():
+            self.lstCelebs.setCurrentIndex(index)
+            if load_images:
+                self.select_current_celeb(False)
 
 
     def show_settings(self):

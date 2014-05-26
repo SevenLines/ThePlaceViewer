@@ -2,6 +2,7 @@ import re
 from PIL import Image
 import StringIO
 import sys
+import logging
 
 from config import *
 
@@ -34,7 +35,7 @@ class ThePlaceImage(object):
             pass
 
         try:
-            b = utls.getPageBytes(self.url_to_icon)
+            b = config.utls.getPageBytes(self.url_to_icon)
             img = Image.open(StringIO.StringIO(b))
             img.save(self.icon_cache_path)
         except(IOError):
@@ -43,7 +44,7 @@ class ThePlaceImage(object):
 
     @property
     def full_image_bytes(self):
-        return utls.getPageBytes(self.full_image_url)
+        return config.utls.getPageBytes(self.full_image_url)
 
     @property
     def full_image_url(self):
@@ -67,7 +68,7 @@ class ThePlaceImage(object):
 
     @property
     def icon_cache_path(self):
-        return os.path.join(icons_cache_dir, str(self.celeb.id), self.name)
+        return os.path.join(config.icons_cache_dir, str(self.celeb.id), self.name)
 
     def __repr__(self):
         # return urlparse.

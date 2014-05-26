@@ -2,6 +2,9 @@ import bs4
 import bs4.element
 import socket
 import urllib2
+import  logging
+
+log = logging.getLogger(__name__)
 
 
 def get_file_text(path):
@@ -46,14 +49,18 @@ class UrlUtils:
         if self.debugLevel == 1:
             print u'trying to connect to "%s"' % url
 
+        response = None
         try:
             response = opener.open(request, timeout=self.timeout)
         except urllib2.URLError, e:
-            raise Exception(u"There was an error: %r" % e)
+            log.error("There was an error: %r" % e)
         except socket.timeout, e:
-            raise Exception(u"Socket timeout: %r" % e)
-        out = response.read()
-        response.close()
+            log.error("Socket timeout: %r" % e)
+
+        out = None
+        if response:
+            out = response.read()
+            response.close()
         return out
 
     # return page in the specific encoding of self.encoding

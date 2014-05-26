@@ -1,11 +1,14 @@
 MainWindow:
-  Filter: !!python/unicode 'Shak'
+  Filter: !!python/unicode ''
   Geometry: !!python/object/apply:PySide.QtCore.QByteArray
   - !!binary |
-    AdnQywABAAD////5////+AAABI0AAALEAAAAAwAAABgAAASDAAACugAAAAAAAA==
-  SelectedItem: !!python/unicode 'Shakira Mebarak'
+    AdnQywABAAAAAAAAAAAAAAAABVUAAAL/AAABaQAAAMUAAAPsAAACUQAAAAACAA==
+  SelectedItem: !!python/unicode 'Kathleen Turner'
   SelectedPage: 1
   splitImagesState: !!python/object/apply:PySide.QtCore.QByteArray
   - !!binary |
     AAAA/wAAAAAAAAACAAACEAAAAa4BAAAABgEAAAAB
-config: {base_url: 'http://www.theplace.ru', encoding: cp1251, save_dir: !!python/unicode '/media/homeworld/_IMAGES/_PPL'}
+config:
+  base_url: http://www.theplace.ru
+  encoding: cp1251
+  save_dir: {unix: !!python/unicode '/media/homeworld/_IMAGES/_PPL', win32: !!python/unicode 'D:\_IMAGES\_PPL'}
